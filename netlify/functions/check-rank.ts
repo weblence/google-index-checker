@@ -1,7 +1,11 @@
 import { Handler } from '@netlify/functions'
 import SerpApi from "google-search-results-nodejs";
 
-const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY);
+if (!process.env.SERPAPI_KEY) {
+  throw new Error('SERPAPI_KEY is not defined');
+}
+
+const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY as string);
 
 export const handler: Handler = async (event) => {
   if (event.httpMethod !== 'POST') {
