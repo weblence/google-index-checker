@@ -1,6 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import SerpApi from "google-search-results-nodejs";
-const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY);
+
+if (!process.env.SERPAPI_KEY) {
+  throw new Error('SERPAPI_KEY is not defined');
+}
+
+const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY as string);
 
 export default async function handler(
   req: NextApiRequest,
@@ -20,7 +25,7 @@ export default async function handler(
         num: 100,
         hl: "tr",
         gl: "tr",
-        device: "mobile", // Mobil cihaz sonuçları için
+        device: "mobile",
         google_domain: "google.com.tr"
       }, (result: any) => resolve(result));
     });
