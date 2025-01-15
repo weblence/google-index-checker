@@ -1,27 +1,23 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import SerpApi from "google-search-results-nodejs";
 
-interface ErrorResponse {
-  message: string;
-  error?: string;
-}
-
-interface SuccessResponse {
-  rank: number | string;
-  foundUrl: string;
-  searchedUrl: string;
-  timestamp: string;
+interface SearchResult {
+  organic_results?: Array<{
+    link: string;
+    title: string;
+    position: number;
+  }>;
 }
 
 if (!process.env.SERPAPI_KEY) {
   throw new Error('SERPAPI_KEY is not defined');
 }
 
-const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY);
+const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY as string);
 
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<SuccessResponse | ErrorResponse>
+  res: NextApiResponse
 ) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' })
@@ -31,7 +27,7 @@ export default async function handler(
   const cleanUrl = url.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
 
   try {
-    const searchResults = await new Promise<SerpApi.SearchResponse>((resolve) => {
+    const searchResults = await new Promise<SearchResult>((resolve) => {
       search.json({
         q: keyword,
         num: 100,
@@ -57,7 +53,12 @@ export default async function handler(
       rank: rank === -1 ? 'İlk 100 mobil sonuç içinde bulunamadı' : rank,
       foundUrl,
       searchedUrl: cleanUrl,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      topResults: searchResults.organic_results?.slice(0, 10).map(result => ({
+        position: result.position,
+        title: result.title,
+        link: result.link
+      }))
     })
 
   } catch (error) {
