@@ -36,10 +36,10 @@ export default function Home() {
 
   const checkRank = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const lastSearchTime = localStorage.getItem('lastSearchTime');
     const now = Date.now();
-    
+
     if (lastSearchTime && now - parseInt(lastSearchTime) < 30000) {
       const remainingTime = Math.ceil((30000 - (now - parseInt(lastSearchTime))) / 1000);
       setCountdown(remainingTime);
@@ -48,7 +48,7 @@ export default function Home() {
 
     setLoading(true);
     setResult(null);
-    
+
     try {
       const response = await fetch('/.netlify/functions/check-rank', {
         method: 'POST',
@@ -57,7 +57,7 @@ export default function Home() {
         },
         body: JSON.stringify({ keyword, url }),
       });
-      
+
       const data = await response.json();
       setResult(data);
       localStorage.setItem('lastSearchTime', now.toString());
@@ -88,7 +88,7 @@ export default function Home() {
         {/* Arkaplan Efektleri */}
         <div className="fixed inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]" />
         <div className="fixed inset-0 bg-gradient-to-tr from-[#0A0F1C] via-transparent to-transparent opacity-60" />
-        
+
         <div className="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
           {/* Header */}
           <motion.div
@@ -163,11 +163,10 @@ export default function Home() {
                 whileTap={{ scale: countdown > 0 ? 1 : 0.98 }}
                 type="submit"
                 disabled={loading || countdown > 0}
-                className={`w-full ${
-                  countdown > 0 
-                    ? 'bg-gray-600 hover:bg-gray-600' 
+                className={`w-full ${countdown > 0
+                    ? 'bg-gray-600 hover:bg-gray-600'
                     : 'bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700'
-                } text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50`}
+                  } text-white font-medium py-4 px-6 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 disabled:opacity-50`}
               >
                 {loading ? (
                   <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -202,7 +201,7 @@ export default function Home() {
                         Sıralama Sonucu
                       </h3>
                       <p className="mt-2 text-gray-300">
-                        Siteniz "{keyword}" araması için {result.rank}. sırada
+                        Siteniz &quot;{keyword}&quot; araması için {result.rank}. sırada
                       </p>
                       <p className="mt-1 text-sm text-gray-500">
                         {new Date(result.timestamp).toLocaleString('tr-TR')}
