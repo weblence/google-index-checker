@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
+import { Handler } from '@netlify/functions'
 import SerpApi from "google-search-results-nodejs";
 
 interface SearchResult {
@@ -15,15 +15,18 @@ if (!process.env.SERPAPI_KEY) {
 
 const search = new SerpApi.GoogleSearch(process.env.SERPAPI_KEY as string);
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ message: 'Method not allowed' })
+export const handler: Handler = async (event) => {
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: 'Method not allowed' })
+    }
   }
 
-  const { keyword, url } = req.body
+  const { keyword, url } = JSON.parse(event.body || '{}')
   const cleanUrl = url.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
 
   try {
@@ -49,23 +52,34 @@ export default async function handler(
       }
     })
 
-    return res.status(200).json({ 
-      rank: rank === -1 ? 'İlk 100 mobil sonuç içinde bulunamadı' : rank,
-      foundUrl,
-      searchedUrl: cleanUrl,
-      timestamp: new Date().toISOString(),
-      topResults: searchResults.organic_results?.slice(0, 10).map(result => ({
-        position: result.position,
-        title: result.title,
-        link: result.link
-      }))
-    })
+    return {
+      statusCode: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        rank: rank === -1 ? 'İlk 100 mobil sonuç içinde bulunamadı' : rank,
+        foundUrl,
+        searchedUrl: cleanUrl,
+        timestamp: new Date().toISOString(),
+        topResults: searchResults.organic_results?.slice(0, 10).map(result => ({
+          position: result.position,
+          title: result.title,
+          link: result.link
+        }))
+      })
+    }
 
   } catch (error) {
-    console.error('Search error:', error)
-    return res.status(500).json({ 
-      message: 'Arama sırasında bir hata oluştu',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    })
+    return {
+      statusCode: 500,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: 'Arama sırasında bir hata oluştu',
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
   }
 }
