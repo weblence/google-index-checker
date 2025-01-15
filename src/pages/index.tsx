@@ -53,11 +53,12 @@ export default function Home() {
       setResult(`Siteniz "${keyword}" araması için ${data.rank}. sırada`);
       localStorage.setItem('lastSearchTime', now.toString());
       setCountdown(30);
-    } catch (error) {
+    } catch {
       setResult('Bir hata oluştu');
     } finally {
       setLoading(false);
     }
+
   };
 
   return (
