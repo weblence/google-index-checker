@@ -38,16 +38,14 @@ export default function Home() {
     setResult('Aranıyor...');
     
     try {
-      const response = await fetch('/api/check-rank', {
+      const response = await fetch('/.netlify/functions/check-rank', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ 
-          keyword, 
-          url: url.replace(/^https?:\/\//, '').replace(/\/$/, '') 
-        }),
+        body: JSON.stringify({ keyword, url }),
       });
+      
       
       const data = await response.json();
       setResult(`Siteniz "${keyword}" araması için ${data.rank}. sırada`);
