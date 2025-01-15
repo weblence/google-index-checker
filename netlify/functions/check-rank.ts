@@ -1,6 +1,14 @@
 import { Handler } from '@netlify/functions'
 import SerpApi from "google-search-results-nodejs";
 
+interface SearchResult {
+  organic_results?: Array<{
+    link: string;
+    title: string;
+    position: number;
+  }>;
+}
+
 if (!process.env.SERPAPI_KEY) {
   throw new Error('SERPAPI_KEY is not defined');
 }
@@ -19,7 +27,7 @@ export const handler: Handler = async (event) => {
   const cleanUrl = url.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
 
   try {
-    const searchResults = await new Promise((resolve) => {
+    const searchResults = await new Promise<SearchResult>((resolve) => {
       search.json({
         q: keyword,
         num: 100,
