@@ -24,7 +24,7 @@ export default async function handler(
   }
 
   const { keyword, url } = req.body
-  const cleanUrl = url.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
+  const cleanUrl = url ? url.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '') : ''
 
   try {
     const searchResults = await new Promise<SearchResult>((resolve) => {
@@ -41,13 +41,15 @@ export default async function handler(
     let rank = -1
     let foundUrl = ''
 
-    searchResults.organic_results?.forEach((result, index) => {
-      const resultUrl = result.link.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
-      if (resultUrl.includes(cleanUrl) || cleanUrl.includes(resultUrl)) {
-        rank = index + 1
-        foundUrl = result.link
-      }
-    })
+    if (cleanUrl) {
+      searchResults.organic_results?.forEach((result, index) => {
+        const resultUrl = result.link.toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '')
+        if (resultUrl.includes(cleanUrl) || cleanUrl.includes(resultUrl)) {
+          rank = index + 1
+          foundUrl = result.link
+        }
+      })
+    }
 
     return res.status(200).json({ 
       rank: rank === -1 ? 'İlk 100 mobil sonuç içinde bulunamadı' : rank,
